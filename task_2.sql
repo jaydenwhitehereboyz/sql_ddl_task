@@ -1,4 +1,3 @@
-#Task 2
 
 WITH r_tables AS (SELECT *
     FROM dblink(
