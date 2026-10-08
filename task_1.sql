@@ -1,5 +1,3 @@
-#Task 1.1
-
 WITH r_tables AS (
     SELECT *
     FROM dblink(
@@ -22,8 +20,6 @@ WHERE l.table_type = 'BASE TABLE'
 ORDER BY l.table_schema, l.table_name;
 
 
-
-#Task 1.2 & 1.3
 
 WITH r AS (
     SELECT *
@@ -68,6 +64,7 @@ cte AS (
             OR l.character_maximum_length IS DISTINCT FROM r.character_maximum_length
             OR l.numeric_precision IS DISTINCT FROM r.numeric_precision
             OR l.numeric_scale IS DISTINCT FROM r.numeric_scale
+            OR col_description((quote_ident(l.table_schema) || '.' || quote_ident(l.table_name))::regclass, l.ordinal_position) IS DISTINCT FROM r.column_comment
             OR l.is_nullable IS DISTINCT FROM r.is_nullable)
 ),
 typed AS (
