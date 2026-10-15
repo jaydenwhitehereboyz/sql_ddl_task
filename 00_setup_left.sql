@@ -25,3 +25,12 @@ CREATE TABLE rep.archive (
     history varchar(32) NOT NULL,
     reason varchar(16)
 );
+
+CREATE SCHEMA sales;
+
+CREATE TABLE sales.orders (
+    id int4 NOT NULL,
+    amount numeric(10,2),
+    customer varchar(32)
+);
+COMMENT ON COLUMN sales.orders.id IS 'Order ID';
