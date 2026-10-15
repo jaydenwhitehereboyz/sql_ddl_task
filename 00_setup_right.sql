@@ -23,3 +23,11 @@ CREATE TABLE rep.log (
     action_required varchar(24),
     status_message varchar(32) NOT NULL
 );
+
+CREATE SCHEMA crm;
+
+CREATE TABLE crm.orders (
+    id int8,
+    amount numeric(12,2),
+    extra text
+);
