@@ -45,7 +45,7 @@ WITH r_tables AS (SELECT *
     JOIN r_tables rt
         ON l.table_name = rt.table_name
     LEFT JOIN r_columns rc
-        ON l.table_schema = rc.table_schema
+        ON rt.table_schema = rc.table_schema
         AND rt.table_name = rc.table_name
         AND l.column_name = rc.column_name
     WHERE l.table_schema NOT IN ('pg_catalog', 'information_schema')
