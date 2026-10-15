@@ -33,6 +33,7 @@ WITH r_tables AS (SELECT *
         l.numeric_scale AS left_numeric_scale,
         l.is_nullable AS left_is_nullable,
         col_description((quote_ident(l.table_schema) || '.' || quote_ident(l.table_name))::regclass, l.ordinal_position) AS left_comment,
+		rt.table_schema AS right_schema,
         rc.column_name AS right_column_name,
         rc.udt_name AS right_udt_name,
         rc.character_maximum_length AS right_character_maximum_length,
@@ -42,11 +43,10 @@ WITH r_tables AS (SELECT *
         rc.column_comment AS right_comment
     FROM information_schema.columns l
     JOIN r_tables rt
-        ON l.table_schema = rt.table_schema
-        AND l.table_name = rt.table_name
+        ON l.table_name = rt.table_name
     LEFT JOIN r_columns rc
         ON l.table_schema = rc.table_schema
-        AND l.table_name = rc.table_name
+        AND rt.table_name = rc.table_name
         AND l.column_name = rc.column_name
     WHERE l.table_schema NOT IN ('pg_catalog', 'information_schema')
 ),
@@ -70,7 +70,7 @@ typed AS (
 
 SELECT 1 AS step, table_name, column_name,
        format('ALTER TABLE %I.%I ADD COLUMN %I %s;',
-              table_schema, table_name, column_name, left_type_full) AS ddl
+              right_schema, table_name, column_name, left_type_full) AS ddl
 			  
 			  
 FROM typed
@@ -79,7 +79,7 @@ WHERE right_column_name IS NULL
 UNION ALL
 SELECT 2 AS step, table_name, column_name,
        format('ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %I::%s;',
-              table_schema, table_name, column_name, left_type_full, column_name, left_type_full) AS ddl
+              right_schema, table_name, column_name, left_type_full, column_name, left_type_full) AS ddl
 FROM typed
 WHERE right_column_name IS NOT NULL
   AND left_type_full IS DISTINCT FROM right_type_full
@@ -87,13 +87,13 @@ WHERE right_column_name IS NOT NULL
 UNION ALL 
 SELECT 3 AS step, table_name, column_name,
        format('ALTER TABLE %I.%I ALTER COLUMN %I %s NOT NULL;',
-              table_schema, table_name, column_name,
+              right_schema, table_name, column_name,
               CASE WHEN left_is_nullable = 'NO' THEN 'SET' ELSE 'DROP' END) AS ddl
 FROM typed
 WHERE left_is_nullable IS DISTINCT FROM right_is_nullable AND NOT (right_column_name IS NULL AND left_is_nullable = 'YES')
 UNION ALL
 SELECT 4 AS step, table_name, column_name,
-       format('COMMENT ON COLUMN %I.%I.%I IS %L;', table_schema, table_name, column_name, left_comment) as ddl
+       format('COMMENT ON COLUMN %I.%I.%I IS %L;', right_schema, table_name, column_name, left_comment) as ddl
 FROM typed
 WHERE left_comment IS DISTINCT FROM right_comment
 ORDER BY step, table_name, column_name;
