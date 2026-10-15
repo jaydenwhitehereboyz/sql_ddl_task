@@ -13,8 +13,7 @@ SELECT l.table_name,
        r.table_schema AS right_schema
 FROM information_schema.tables l
 JOIN r_tables r
-  ON l.table_schema = r.table_schema
- AND l.table_name = r.table_name
+ ON l.table_name = r.table_name
 WHERE l.table_type = 'BASE TABLE'
   AND l.table_schema NOT IN ('pg_catalog', 'information_schema')
 ORDER BY l.table_schema, l.table_name;
@@ -56,8 +55,7 @@ cte AS (
         r.column_comment AS right_comment
     FROM information_schema.columns l
     JOIN r
-        ON l.table_schema = r.table_schema
-        AND l.table_name = r.table_name
+        ON l.table_name = r.table_name
         AND l.column_name = r.column_name
     WHERE l.table_schema NOT IN ('pg_catalog', 'information_schema')
         AND (l.udt_name IS DISTINCT FROM r.udt_name
